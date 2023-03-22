@@ -1,5 +1,5 @@
 #include <cassert>
-#include "math.h"
+#include "main.h"
 
 int main() {
     // Test add function
