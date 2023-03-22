@@ -16,6 +16,6 @@ jobs:
 
       - name: Build and test
         run: |
-          g++ -o math_test math_test.cpp math.cpp
-          ./math_test
+          g++ -o main_test main_test.cpp main.cpp
+          ./main_test
 
