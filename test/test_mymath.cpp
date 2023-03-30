@@ -4,7 +4,7 @@
  * @brief Test file for mymath library.
  */
 
-#include "../src/mymath.hpp"
+#include "mymath.hpp"
 #include <cassert>
 
 int main() {
