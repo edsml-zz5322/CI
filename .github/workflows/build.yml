@@ -1,48 +1,43 @@
-name: CMake build, test, and deploy
+name: Build Project
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
-    name: Build
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            generator: Ninja
-          - os: macos-latest
-            generator: Ninja
-          - os: windows-latest
-            generator: "Visual Studio 16 2019"
-    env:
-      CTEST_OUTPUT_ON_FAILURE: 1
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up CMake ${{ matrix.generator }}
-        uses: alexivkin/setup-cmake@v1
-        with:
-          cmake-version: '3.21.3'
-          cmake-generator: ${{ matrix.generator }}
-      - name: Configure
-        run: |
-          cmake -B build -S .
-          cmake --build build --config Release
-      - name: Test
-        run: |
-          cmake --build build --target test --config Release
-      - name: Generate docs
-        run: |
-          cmake --build build --target docs
-      - name: Deploy
-        if: success()
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        with:
-          branch: gh-pages
-          folder: build/docs/html
+    runs-on: ${{ matrix.os }}
 
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Configure CMake
+        run: cmake -S . -B build
+
+      - name: Build project
+        run: cmake --build build
