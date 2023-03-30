@@ -1,0 +1,45 @@
+name: Build documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install doxygen
+
+    - name: Generate HTML Documentation
+      run: doxygen Doxyfile
+
+    - name: Install LaTeX
+      run: sudo apt-get install texlive-latex-base 
+texlive-fonts-recommended texlive-latex-extra
+
+    - name: Install epstopdf
+      run: sudo apt-get install texlive-font-utils
+
+    - name: Generate PDF
+      run: |
+        cd ./docs/latex
+        make LATEX_OPTIONS=-output-format=pdf
+  
+    - name: Move PDF to docs folder and delete latex folder
+      run: |
+        mv ./docs/latex/refman.pdf ./docs/project.pdf
+        rm -rf ./docs/latex
+    
+    - name: Commit documentation changes
+      run: |
+        git config user.name "$(git log -n 1 --pretty=format:%an)"
+        git config user.email "$(git log -n 1 --pretty=format:%ae)"
+        git add docs/
+        git commit -m "Update documentation"
+        git push
